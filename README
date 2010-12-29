@@ -1,0 +1,7 @@
+The itlcmp is a simple command-line tool to compare the tracks in the iTunes
+music library file with the media on disk. The source code is licensed using
+the Apache License, Version 2.0.
+
+This program was mainly intended as a mechanism to better understand the Go
+language and toolset. The program's functionality also helps my need to
+fastidiously maintain my media library. Twofer!
