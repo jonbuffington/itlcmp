@@ -58,7 +58,7 @@ func (*library) dir() string {
 }
 
 func (l *library) open() (err os.Error) {
-	l.file, err = os.Open(l.dir()+"iTunes Music Library.xml", os.O_RDONLY, 0)
+	l.file, err = os.Open(l.dir()+"iTunes Music Library.xml")
 	return
 }
 
@@ -132,7 +132,7 @@ func (l *library) parse() {
 }
 
 func (l *library) checkDir(dirpath string) {
-	dir, err := os.Open(dirpath, os.O_RDONLY, 0)
+	dir, err := os.Open(dirpath)
 	if err == nil {
 		fis, err := dir.Readdir(-1)
 		dir.Close()
