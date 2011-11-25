@@ -19,12 +19,12 @@ package main
 import (
 	"container/vector"
 	"fmt"
-	"http"
+
 	"os"
 	"path"
 	"strings"
+	"url"
 )
-
 
 const (
 	KEY_KIND       = "Kind"       // string
@@ -33,7 +33,6 @@ const (
 	KEY_TRACK_TYPE = "Track Type" // string
 )
 
-
 type library struct {
 	file     *os.File
 	nofiles  vector.StringVector
@@ -41,7 +40,6 @@ type library struct {
 	stats    *statistics
 	tracks   map[string]bool
 }
-
 
 func newLibrary() *library {
 	statistics := newStatistics()
@@ -58,7 +56,7 @@ func (*library) dir() string {
 }
 
 func (l *library) open() (err os.Error) {
-	l.file, err = os.Open(l.dir()+"iTunes Music Library.xml")
+	l.file, err = os.Open(l.dir() + "iTunes Music Library.xml")
 	return
 }
 
@@ -114,9 +112,9 @@ func (l *library) parse() {
 					}
 					if p.findKey(KEY_LOCATION) && p.findElem(&stringStartEl, &dictEndEl) {
 						if location := p.text(); len(location) > 0 {
-							if url, err := http.ParseURL(location); err == nil {
-								if l.checkTrack(url.Path) {
-									l.tracks[url.Path] = true
+							if url_, err := url.Parse(location); err == nil {
+								if l.checkTrack(url_.Path) {
+									l.tracks[url_.Path] = true
 								}
 								l.stats.tracks++
 							}
