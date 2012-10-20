@@ -17,13 +17,12 @@
 package main
 
 import (
-	"container/vector"
 	"fmt"
-
+	"io"
+	"net/url"
 	"os"
 	"path"
 	"strings"
-	"url"
 )
 
 const (
@@ -35,8 +34,8 @@ const (
 
 type library struct {
 	file     *os.File
-	nofiles  vector.StringVector
-	notracks vector.StringVector
+	nofiles  []string
+	notracks []string
 	stats    *statistics
 	tracks   map[string]bool
 }
@@ -45,8 +44,8 @@ func newLibrary() *library {
 	statistics := newStatistics()
 	return &library{
 		tracks:   make(map[string]bool),
-		notracks: vector.StringVector{},
-		nofiles:  vector.StringVector{},
+		notracks: make([]string, 0),
+		nofiles:  make([]string, 0),
 		stats:    statistics,
 	}
 }
@@ -55,7 +54,7 @@ func (*library) dir() string {
 	return os.Getenv("HOME") + "/Music/iTunes/"
 }
 
-func (l *library) open() (err os.Error) {
+func (l *library) open() (err error) {
 	l.file, err = os.Open(l.dir() + "iTunes Music Library.xml")
 	return
 }
@@ -66,7 +65,7 @@ func (l *library) close() {
 
 func (l *library) examine() {
 	defer func() {
-		if ex := recover(); ex == os.EOF {
+		if ex := recover(); ex == io.EOF {
 			// Any missing media files?
 			if len(l.nofiles) > 0 {
 				fmt.Fprintln(os.Stderr, "\nThe following tracks were not found in your media files:")
@@ -136,11 +135,11 @@ func (l *library) checkDir(dirpath string) {
 		dir.Close()
 		if err == nil {
 			for _, fi := range fis {
-				pathname := dirpath + "/" + fi.Name
+				pathname := dirpath + "/" + fi.Name()
 				switch {
-				case fi.IsRegular():
+				case fi.Mode()&os.ModeType == 0:
 					l.checkFile(pathname)
-				case fi.IsDirectory() && strings.ToLower(path.Ext(pathname)) != ".itlp":
+				case fi.IsDir() && strings.ToLower(path.Ext(pathname)) != ".itlp":
 					l.checkDir(pathname)
 				}
 			}
@@ -157,7 +156,7 @@ func (l *library) checkFile(pathname string) {
 		case ".epub", ".m4r", ".pdf", ".plist":
 			// Ignore non-audio media and ringtones.
 		default:
-			l.notracks.Push(pathname)
+			l.notracks = append(l.notracks, pathname)
 		}
 	}
 }
@@ -167,6 +166,6 @@ func (l *library) checkTrack(pathname string) bool {
 	if err == nil {
 		return true
 	}
-	l.nofiles.Push(pathname)
+	l.nofiles = append(l.nofiles, pathname)
 	return false
 }

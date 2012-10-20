@@ -17,10 +17,9 @@
 package main
 
 import (
-  "os"
-	"xml"
+	"encoding/xml"
+	"os"
 )
-
 
 var (
 	dictStartEl   = xml.StartElement{Name: xml.Name{Local: "dict"}}
@@ -33,16 +32,14 @@ var (
 	stringEndEl   = xml.EndElement{Name: xml.Name{Local: "string"}}
 )
 
-
-type parser xml.Parser
-
+type parser xml.Decoder
 
 func newParser(file *os.File) *parser {
-  return (*parser)(xml.NewParser(file))
+	return (*parser)(xml.NewDecoder(file))
 }
 
 func (p *parser) nextToken() xml.Token {
-	tok, err := (*xml.Parser)(p).Token()
+	tok, err := (*xml.Decoder)(p).Token()
 	if err != nil {
 		// Bounce up the call train to the recover handler.
 		panic(err)

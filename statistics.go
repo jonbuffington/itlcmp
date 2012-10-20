@@ -20,7 +20,6 @@ import (
 	"fmt"
 )
 
-
 type statistics struct {
 	tracks int
 	exts   map[string]int
