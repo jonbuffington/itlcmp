@@ -44,8 +44,8 @@ func newLibrary() *library {
 	statistics := newStatistics()
 	return &library{
 		tracks:   make(map[string]bool),
-		notracks: make([]string, 0),
-		nofiles:  make([]string, 0),
+		notracks: []string{},
+		nofiles:  []string{},
 		stats:    statistics,
 	}
 }
